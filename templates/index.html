@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Send JSON Data</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+        color: #333;
+      }
+
+      .container {
+        max-width: 900px;
+        margin: 20px auto;
+        padding: 20px;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+      h1 {
+        text-align: center;
+        color: #007bff;
+      }
+
+      form {
+        display: flex;
+        flex-direction: column;
+      }
+
+      label {
+        margin-bottom: 8px;
+        font-weight: bold;
+      }
+
+      input[type="number"] {
+        padding: 10px;
+        margin-bottom: 16px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 16px;
+      }
+
+      button {
+        padding: 10px;
+        background-color: #007bff;
+        border: none;
+        border-radius: 4px;
+        color: #fff;
+        font-size: 16px;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background-color: #0056b3;
+      }
+
+      h2 {
+        margin-top: 20px;
+        color: #333;
+      }
+
+      pre {
+        background: #f8f9fa;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        overflow-x: auto;
+      }
+
+      @media (max-width: 600px) {
+        .container {
+          margin: 10px;
+          padding: 10px;
+        }
+
+        input[type="number"],
+        button {
+          font-size: 14px;
+        }
+      }
+    </style>
+    <script>
+      function sendData(event) {
+        event.preventDefault(); // Prevent default form submission
+
+        // Gather form data
+        const ph = document.getElementById("ph").value;
+        const hardness = document.getElementById("hardness").value;
+        const solids = document.getElementById("solids").value;
+        const chloramines = document.getElementById("chloramines").value;
+        const sulfate = document.getElementById("sulfate").value;
+        const conductivity = document.getElementById("conductivity").value;
+        const organicCarbon = document.getElementById("organicCarbon").value;
+        const trihalomethanes =
+          document.getElementById("trihalomethanes").value;
+        const turbidity = document.getElementById("turbidity").value;
+
+        // Create JSON payload
+        const data = [
+          {
+            ph: parseFloat(ph),
+            Hardness: parseFloat(hardness),
+            Solids: parseFloat(solids),
+            Chloramines: parseFloat(chloramines),
+            Sulfate: parseFloat(sulfate),
+            Conductivity: parseFloat(conductivity),
+            Organic_carbon: parseFloat(organicCarbon),
+            Trihalomethanes: parseFloat(trihalomethanes),
+            Turbidity: parseFloat(turbidity),
+          },
+        ];
+
+        // Send POST request
+        fetch("http://127.0.0.1:5000/predict", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log("Success:", data);
+            console.log(data);
+            // Assuming `data` is an array with prediction results
+            const prediction = data[0]; // Get the first prediction result
+
+            let message;
+            let color;
+            if (prediction === 1) {
+              message =
+                "The water is predicted to be safe for human consumption.";
+              color = "green";
+            } else if (prediction === 0) {
+              message =
+                "The water is predicted to be not safe for human consumption.";
+              color = "red";
+            } else {
+              message = "The prediction result is unclear.";
+              color = "orange";
+            }
+
+            // Display the user-friendly message with color
+            const responseElement = document.getElementById("response");
+            responseElement.innerText = message;
+            responseElement.style.color = color;
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            document.getElementById("response").innerText =
+              "Error: " + error.message;
+            document.getElementById("response").style.color = "red";
+          });
+      }
+    </script>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Water Potability</h1>
+      <form onsubmit="sendData(event)">
+        <label for="ph">pH:</label>
+        <input type="number" id="ph" step="any" required />
+
+        <label for="hardness">Hardness:</label>
+        <input type="number" id="hardness" step="any" required />
+
+        <label for="solids">Solids:</label>
+        <input type="number" id="solids" step="any" required />
+
+        <label for="chloramines">Chloramines:</label>
+        <input type="number" id="chloramines" step="any" required />
+
+        <label for="sulfate">Sulfate:</label>
+        <input type="number" id="sulfate" step="any" required />
+
+        <label for="conductivity">Conductivity:</label>
+        <input type="number" id="conductivity" step="any" required />
+
+        <label for="organicCarbon">Organic Carbon:</label>
+        <input type="number" id="organicCarbon" step="any" required />
+
+        <label for="trihalomethanes">Trihalomethanes:</label>
+        <input type="number" id="trihalomethanes" step="any" required />
+
+        <label for="turbidity">Turbidity:</label>
+        <input type="number" id="turbidity" step="any" required />
+
+        <button type="submit">Send Data</button>
+      </form>
+      <h2>Response:</h2>
+      <pre id="response"></pre>
+    </div>
+  </body>
+</html>
